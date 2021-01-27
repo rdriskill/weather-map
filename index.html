@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+            integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin=""/>
+        <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+            integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
+
+        <script src="js/leaflet.canary.plugin.js"></script>
+    </head>
+    <body>
+        <div id="map" style="height: 900px;"></div>
+
+        <script>
+            (function () {
+                const overlayMaps = {};
+                overlayMaps['Clouds (openweathermap.org)'] = L.tileLayer('http://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=710c5dc63e67e61ab6372e17672a98f8',
+                    { id: 'MapID', tileSize: 512, zoomOffset: -1 });
+                overlayMaps['Clouds (owm.io/vane)'] = L.tileLayer('https://a.sat.owm.io/vane/2.0/weather/CL/{z}/{x}/{y}?appid=9de243494c0b295cca9337e1e96b00e2',
+                    { id: 'MapID', tileSize: 512, zoomOffset: -1 });
+                overlayMaps['Precipitation (openweathermap.org)'] = L.tileLayer('http://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=710c5dc63e67e61ab6372e17672a98f8',
+                    { id: 'MapID', tileSize: 512, zoomOffset: -1 });
+                overlayMaps['Precipitation (owm.io/vane)'] = L.tileLayer('https://f.sat.owm.io/vane/2.0/weather/PA0/{z}/{x}/{y}?appid=9de243494c0b295cca9337e1e96b00e2&palette=0.9:00fa96;1.8:00fa64;2.4:00e600;3:00d300;4.5:00ba00;6:00a000;9:008c00;10.5:007800;11.1:006400;12:005a00;15:005000;18:004600;21:eff800;24:f3eb00;27:fadc00;30:ffcd00;36:ff9600;42:ff5b00;48:ff0000;72:ff0064;96:ff0092;192:aa2bc3;300:7609a4&opacity=0.4',
+                    { id: 'MapID', tileSize: 512, zoomOffset: -1 });
+                overlayMaps['Precipitation (idpgis.ncep.noaa.gov)'] = L.tileLayer.wms("https://idpgis.ncep.noaa.gov/arcgis/services/NWS_Observations/radar_base_reflectivity/MapServer/WMSServer", {
+                    layers: '1', format: 'png32', transparent: true, dpi: 128, canaryRequest: true });
+                overlayMaps['Precipitation (new.nowcoast.noaa.gov)'] = L.tileLayer.wms("http://new.nowcoast.noaa.gov/arcgis/services/nowcoast/radar_meteo_imagery_nexrad_time/MapServer/WMSServer", {
+                    layers: '1', format: 'png32', transparent: true, dpi: 128, canaryRequest: true });
+                overlayMaps['Wind Speed (openweathermap.org)'] = L.tileLayer('http://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=710c5dc63e67e61ab6372e17672a98f8',
+                    { id: 'MapID', tileSize: 512, zoomOffset: -1 });
+                overlayMaps['Wind Speed (owm.io/vane)'] = L.tileLayer('https://a.sat.owm.io/vane/2.0/weather/WS10/3/0/3?appid=9de243494c0b295cca9337e1e96b00e2',
+                    { id: 'MapID', tileSize: 512, zoomOffset: -1 });
+                overlayMaps['Temperature (openweathermap.org)'] = L.tileLayer('http://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=710c5dc63e67e61ab6372e17672a98f8',
+                    { id: 'MapID', tileSize: 512, zoomOffset: -1 });
+                overlayMaps['Temperature (owm.io/vane)'] = L.tileLayer('https://a.sat.owm.io/vane/2.0/weather/TA2/{z}/{x}/{y}?appid=9de243494c0b295cca9337e1e96b00e2&fill_bound',
+                    { id: 'MapID', tileSize: 512, zoomOffset: -1 });
+                
+                const baseMaps = {};
+                baseMaps['Satellite (Mapbox)'] = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/satellite-v9/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoicmRyaXNraWxsIiwiYSI6ImNra2FwbnJheDA0cHoyb3BvdGNpYzkzazkifQ.OqTBBc9Bhc__4kLY06QeVg',
+                    { id: 'MapID', tileSize: 512, zoomOffset: -1 });
+                baseMaps['Light (Mapbox)'] = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/light-v10/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoicmRyaXNraWxsIiwiYSI6ImNra2FwbnJheDA0cHoyb3BvdGNpYzkzazkifQ.OqTBBc9Bhc__4kLY06QeVg',
+                    { id: 'MapID', tileSize: 512, zoomOffset: -1 });
+                baseMaps['Streets (Mapbox)'] = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoicmRyaXNraWxsIiwiYSI6ImNra2FwbnJheDA0cHoyb3BvdGNpYzkzazkifQ.OqTBBc9Bhc__4kLY06QeVg',
+                    { id: 'MapID', tileSize: 512, zoomOffset: -1 });
+
+                const map = L.map('map', {
+                    layers: [ // Default active layers
+                        baseMaps['Satellite (Mapbox)'],
+                        overlayMaps['Precipitation (idpgis.ncep.noaa.gov)']
+                    ] 
+                });
+
+                map.setView([39.132104, -98.681782], 4.5);
+                L.control.layers(baseMaps, overlayMaps).addTo(map);
+            })()
+        </script>
+    </body>
+</html>
