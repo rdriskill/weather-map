@@ -10,7 +10,12 @@
             min: -2,
             max: 2,
             step: 1,
-            initialVal: 0
+            initialVal: 0,
+            setValue: function(value, layer, map) {
+                const now = new Date();
+                now.setHours(now.getHours() + Number.parseInt(value));
+                layer.options.day = now.toISOString().substring(0,19);
+            }
         }
     ];
 
@@ -26,13 +31,7 @@
             zoomOffset: -1,
             controls: {
                 weatherTimeSliderInHrs: {
-                    enabled: true,
-                    attrName: 'day',
-                    getValue: function(sliderValue) {
-                        const now = new Date();
-                        now.setHours(now.getHours() + Number.parseInt(sliderValue));
-                        return now.toISOString().substring(0,19);
-                    }
+                    enabled: true
                 }
             },
             legend: {
@@ -67,13 +66,7 @@
             zoomOffset: -1,
             controls: {
                 weatherTimeSliderInHrs: {
-                    enabled: true,
-                    attrName: 'day',
-                    getValue: function(sliderValue) {
-                        const now = new Date();
-                        now.setHours(now.getHours() + Number.parseInt(sliderValue));
-                        return now.toISOString().substring(0,19);
-                    }
+                    enabled: true
                 }
             },
             legend: {
@@ -104,13 +97,7 @@
             zoomOffset: -1,
             controls: {
                 weatherTimeSliderInHrs: {
-                    enabled: true,
-                    attrName: 'day',
-                    getValue: function(sliderValue) {
-                        const now = new Date();
-                        now.setHours(now.getHours() + Number.parseInt(sliderValue));
-                        return now.toISOString().substring(0,19);
-                    }
+                    enabled: true
                 }
             },
             legend: {
@@ -142,13 +129,7 @@
             zoomOffset: -1,
             controls: {
                 weatherTimeSliderInHrs: {
-                    enabled: true,
-                    attrName: 'day',
-                    getValue: function(sliderValue) {
-                        const now = new Date();
-                        now.setHours(now.getHours() + Number.parseInt(sliderValue));
-                        return now.toISOString().substring(0,19);
-                    }
+                    enabled: true
                 }
             },
             legend: {

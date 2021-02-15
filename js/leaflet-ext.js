@@ -95,11 +95,16 @@ L.Control.Slider = L.Control.extend({
         L.DomEvent.on(slider.rangeInput, "input", function() {
             slider.map.eachLayer(function (layer) {
                 if (layer.options.controls && layer.options.controls[slider.options.id] && layer.options.controls[slider.options.id].enabled) {
-                    layer.options[layer.options.controls[slider.options.id].attrName] = 
-                    layer.options.controls[slider.options.id].getValue
-                            ? layer.options.controls[slider.options.id].getValue(slider.rangeInput.value)
-                            : slider.rangeInput.value
-                    layer.redraw();
+                    if (layer.options.controls[slider.options.id].setValue) {
+                        layer.options.controls[slider.options.id].setValue(slider.rangeInput.value, layer, slider.map);
+                        layer.redraw();
+                    } else if (slider.options.setValue) {
+                        slider.options.setValue(slider.rangeInput.value, layer, slider.map);
+                        layer.redraw();
+                    }
+                    else {
+                        console.log(`Can't find an implementation of setValue(value, layer, map) in layer or control.`)
+                    }
                 }
             });
         });
