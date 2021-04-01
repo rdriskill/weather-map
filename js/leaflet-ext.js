@@ -1,11 +1,50 @@
+L.Control.ControlGroup = L.Control.extend({
+    initialize: function (tileLayer) {
+        L.setOptions(this, tileLayer.options.controlGroup);
+        this.tileLayer = tileLayer;
+    },
+    onAdd: function (map) {
+        this.container = L.DomUtil.create('div', 'control-group');
+        this.items = [];
+
+        this.container.innerHTML += `<h3 class="heading">${this.tileLayer.options.controlGroup.name}</h3>`;
+        
+        if (this.tileLayer.options.controlGroup && this.tileLayer.options.controlGroup.items) {
+            this.tileLayer.options.controlGroup.items.forEach((itemConfig) => {
+                let item;
+
+                if (itemConfig.type === 'slider') {
+                    item = L.control.slider(this.tileLayer, this.container, itemConfig);
+                } else if (itemConfig.type === 'legend') {
+                    item = L.control.legend(this.tileLayer, this.container, itemConfig);
+                } else {
+                    throw new Error(`Control group item type ${itemConfig.type} is invalid.`);
+                }
+
+                if (item) {
+                    this.items.push(item);
+                    item.addTo(map);
+                }
+            });
+        }
+
+        return this.container;
+    }
+});
+
+L.control.controlGroup = function(tileLayer) {
+    return new L.Control.ControlGroup(tileLayer);
+};
+
 L.Control.Legend = L.Control.extend({
-    initialize: function (tileLayer, options) {
+    initialize: function (tileLayer, container, options) {
         L.setOptions(this, options);
         this.tileLayer = tileLayer;
+        this.container = container;
     },
     onAdd: function(map) {
         this.map = map;
-        this.container = L.DomUtil.create('div', 'leaflet-control-color-scale leaflet-control leaflet-legend-control');
+        const htmlElement = L.DomUtil.create('div', 'legend', this.container);
 
         const gradientColors = [];
         const gradientValues = []
@@ -18,104 +57,74 @@ L.Control.Legend = L.Control.extend({
         const minVal = Math.min(...gradientValues);
         const maxVal = Math.max(...gradientValues);
 
-        this.container.innerHTML += `
-            <div id="color-scale-line" class="leaflet-control-color-scale-line">
-                <div id="leaflet-control" class="leaflet-control-color-scale leaflet-control">
-                    <div id="scale-value" class="scale-value"><span>${this.options.name}</span></div>
-                    <div id="scale-line-gradient" class="leaflet-control-color-scale-line" style="background-image: linear-gradient(to right, ${gradientColors.join()});">
-                        <div class="scale-value scale-min-value"><span> ${minVal} ${this.options.units} </span></div>
-                        <div class="scale-value scale-avg-value" style="left:50%"><span> ${maxVal /2} ${this.options.units} </span></div>
-                        <div class="scale-value scale-max-value"><span> ${maxVal} ${this.options.units} </span></div>
-                    </div>
+        htmlElement.innerHTML += `
+            <h4 class="sub-heading">${this.options.name}</h4>
+            <div class="container">
+                <div class="min-val"> ${minVal} ${this.options.units} </div>
+                <div class="med-val"> ${maxVal /2} ${this.options.units} </div>
+                <div class="max-val"> ${maxVal} ${this.options.units} </div>
+                <div class="gradient" style="background-image: linear-gradient(to right, ${gradientColors.join()});">
                 </div>
-            </div>`;
+            </div>
+        `;
 
         return this.container;
     }
 })
 
-L.control.legend = function(tileLayer, options) {
-    return new L.Control.Legend(tileLayer, options);
+L.control.legend = function(tileLayer, container, options) {
+    return new L.Control.Legend(tileLayer, container, options);
 };
 
 L.Control.Slider = L.Control.extend({
-    initialize: function (options, map) {
-        const slider = this;
-        slider.map = map;
-
+    initialize: function (tileLayer, container, options) {
         L.setOptions(this, options);
-
-        slider.layersRequiringControl = 0;
-        map.on('overlayadd', (e) => {
-            if (e.layer.options.controls && e.layer.options.controls[slider.options.id] && e.layer.options.controls[slider.options.id].enabled) {
-                if (slider.layersRequiringControl === 0) {
-                    slider .addTo(map);
-                }
-                slider.layersRequiringControl += 1;
-            }
-        });
-
-        map.on('overlayremove', (e) => {
-            if (e.layer.options.controls && e.layer.options.controls[slider.options.id] && e.layer.options.controls[slider.options.id].enabled) {
-                slider.layersRequiringControl -= 1;
-                if (slider.layersRequiringControl === 0) {
-                    slider.remove();
-                }
-            }
-        });
+        this.tileLayer = tileLayer;
+        this.container = container;
     },
     onAdd: function(map) {
         const slider = this;
         slider.map = map;
-        slider.container = L.DomUtil.create('div', 'leaflet-slider-control');
+        const htmlElement = L.DomUtil.create('div', 'slider', slider.container);
 
         /* Prevent click events propagation to map */
-        L.DomEvent.disableClickPropagation(slider.container);
+        L.DomEvent.disableClickPropagation(htmlElement);
 
-        slider.container.innerHTML = `
-            <label for="${slider.options.name}">${slider.options.name}</label>
-            <input
-                id="${slider.options.name}"
-                name="${slider.options.name}"
-                type="range"
-                min="${slider.options.min}"
-                max="${slider.options.max}"
-                step="${slider.options.step}"
-                value="${slider.options.initialVal}"
-            >
-            <output>${slider.options.initialVal} ${slider.options.units}</output>
+        htmlElement.innerHTML += `
+            <h4 class="sub-heading">${slider.options.name}</h4>
+            <div class="container">
+                <label for="${slider.options.name}">${slider.options.initialVal} ${slider.options.units}</label>
+                <input
+                    class="range"
+                    type="range"
+                    id="${slider.options.name}"
+                    name="${slider.options.name}"
+                    min="${slider.options.min}"
+                    max="${slider.options.max}"
+                    step="${slider.options.step}"
+                    value="${slider.options.initialVal}"
+                >
+            </div>
         `;
 
-        slider.rangeInput = L.DomUtil.get(slider.container).children[1];
-
+        slider.rangeInput = L.DomUtil.get(htmlElement).children[1].children[1];
         slider.rangeInput.oninput = function (e) {
-            this.nextElementSibling.value = this.value + ' ' + slider.options.units;
+            this.previousElementSibling.innerHTML = this.value + ' ' + slider.options.units;
         }
 
         L.DomEvent.on(slider.rangeInput, "input", function() {
-            slider.map.eachLayer(function (layer) {
-                if (layer.options.controls && layer.options.controls[slider.options.id] && layer.options.controls[slider.options.id].enabled) {
-                    if (layer.options.controls[slider.options.id].setValue) {
-                        layer.options.controls[slider.options.id].setValue(slider.rangeInput.value, layer, slider.map);
-                        layer.redraw();
-                    } else if (slider.options.setValue) {
-                        slider.options.setValue(slider.rangeInput.value, layer, slider.map);
-                        layer.redraw();
-                    }
-                    else {
-                        console.log(`Can't find an implementation of setValue(value, layer, map) in layer or control.`)
-                    }
-                }
-            });
+            if (slider.options.setValue) {
+                slider.options.setValue(slider.rangeInput.value, slider.tileLayer, slider.map);
+                slider.tileLayer.redraw();
+            } else {
+                throw new Error(`Control group item does not have method setValue() defined.`);
+            }
         });
 
-        return slider.container;
-    },
-    onRemove: function() {
-        L.DomUtil.remove(this.container);
-    },
+        return this.container;
+    }
 })
 
-L.control.slider = function(options, map) {
-    return new L.Control.Slider(options, map);
+L.control.slider = function(tileLayer, container, options) {
+    return new L.Control.Slider(tileLayer, container, options);
 };

@@ -1,24 +1,6 @@
 (function () {
     // Config
     ////////////////////////////////////////////////////////////////////
-    const controlsConfig = [{
-            id: 'weatherTimeSliderInHrs',
-            type: 'slider',
-            position: 'bottomright',
-            name: 'Time',
-            units: 'hrs',
-            min: -2,
-            max: 2,
-            step: 1,
-            initialVal: 0,
-            setValue: function(value, layer, map) {
-                const now = new Date();
-                now.setHours(now.getHours() + Number.parseInt(value));
-                layer.options.day = now.toISOString().substring(0,19);
-            }
-        }
-    ];
-
     const overlaysConfig = [{
         id: 'OWM_VANE_CLOUDS',
         type: 'tile',
@@ -29,29 +11,56 @@
             day: new Date().toISOString().substring(0,19),
             tileSize: 512,
             zoomOffset: -1,
-            controls: {
-                weatherTimeSliderInHrs: {
-                    enabled: true
-                }
-            },
-            legend: {
+            controlGroup: {
                 name: 'Clouds',
-                units: "%",
                 position: 'bottomright',
-                gradient: [
-                    { value: 0,color: 'rgba(247,247,255, 0)' },
-                    { value: 10, color: 'rgba(251,247,255, 0)' },
-                    { value: 20, color: 'rgba(244,248,255, 0.1)' },
-                    { value: 30, color: 'rgba(240,249,255, 0.2)' },
-                    { value: 40,color: 'rgba(221,250,255, 0.4)' },
-                    { value: 50,color: 'rgba(224, 224, 224, 0.9)' },
-                    { value: 60,color: 'rgba(224, 224, 224, 0.76)' },
-                    { value: 70,color: 'rgba(228, 228, 228, 0.9)' },
-                    { value: 80,color: 'rgba(232, 232, 232, 0.9)' },
-                    { value: 90,color: 'rgba(214, 213, 213, 1)' },
-                    { value: 95,color: 'rgba(210, 210, 210, 1)' },
-                    { value: 100,color: 'rgba(183, 183, 183, 1)' }
-                ]
+                items: [{
+                    id: 'cloud-legend',
+                    type: 'legend',
+                    name: 'Legend',
+                    units: "%",
+                    gradient: [
+                        { value: 0,color: 'rgba(247,247,255, 0)' },
+                        { value: 10, color: 'rgba(251,247,255, 0)' },
+                        { value: 20, color: 'rgba(244,248,255, 0.1)' },
+                        { value: 30, color: 'rgba(240,249,255, 0.2)' },
+                        { value: 40, color: 'rgba(221,250,255, 0.4)' },
+                        { value: 50, color: 'rgba(224, 224, 224, 0.9)' },
+                        { value: 60, color: 'rgba(224, 224, 224, 0.76)' },
+                        { value: 70, color: 'rgba(228, 228, 228, 0.9)' },
+                        { value: 80, color: 'rgba(232, 232, 232, 0.9)' },
+                        { value: 90, color: 'rgba(214, 213, 213, 1)' },
+                        { value: 95, color: 'rgba(210, 210, 210, 1)' },
+                        { value: 100, color: 'rgba(183, 183, 183, 1)' }
+                    ]
+                }, {
+                    id: 'cloud-time-slider',
+                    type: 'slider',
+                    name: 'Timeline',
+                    units: 'hrs',
+                    min: -2,
+                    max: 2,
+                    step: 1,
+                    initialVal: 0,
+                    setValue: function(value, layer, map) {
+                        const now = new Date();
+                        now.setHours(now.getHours() + Number.parseInt(value));
+                        layer.options.day = now.toISOString().substring(0,19);
+                    }
+                }, {
+                    id: 'cloud-elevation-slider',
+                    type: 'slider',
+                    name: 'Elevation',
+                    units: 'ft',
+                    min: 5000,
+                    max: 25000,
+                    step: 5000,
+                    initialVal: 15000,
+                    setValue: function(value, layer, map) {
+                        layer.options.elevation = value;
+                        const now = new Date();
+                    }
+                }]
             }
         }
     }, {
@@ -63,27 +72,7 @@
         leaflet: {
             day: new Date().toISOString().substring(0,19),
             tileSize: 512,
-            zoomOffset: -1,
-            controls: {
-                weatherTimeSliderInHrs: {
-                    enabled: true
-                }
-            },
-            legend: {
-                name: 'Rain',
-                units: "mm",
-                position: 'bottomright',
-                gradient: [
-                    { value: 0, color: 'rgba(0,255,0, 0)' },
-                    { value: 1, color: 'rgba(0,255,0, 0.2)' },
-                    { value: 3, color: 'rgba(0,232,46, 0.6)' },
-                    { value: 14, color: 'rgba(0,202,145, 0.8)' },
-                    { value: 19, color: 'rgba(0,170,208, 0.9)' },
-                    { value: 49, color: 'rgba(0,156,229, 1)' },
-                    { value: 100, color: 'rgba(14,64,134, 1)' },
-                    { value: 200, color: 'rgba(13,113,252, 1)' }
-                ]
-            }
+            zoomOffset: -1
         }
     }, {
         id: 'OWM_VANE_WIND',
@@ -94,28 +83,7 @@
         leaflet: {
             day: new Date().toISOString().substring(0,19),
             tileSize: 512,
-            zoomOffset: -1,
-            controls: {
-                weatherTimeSliderInHrs: {
-                    enabled: true
-                }
-            },
-            legend: {
-                name: 'Wind',
-                units: "m/s",
-                position: 'bottomright',
-                gradient: [
-                    { value: 0, color: 'rgba(255,255,0, 0)' },
-                    { value: 2, color: 'rgba(170, 128, 177, 0.44)' },
-                    { value: 3, color: 'rgba(170, 128, 177, 0.54)' },
-                    { value: 6, color: 'rgba(176, 128, 177, 0.71)' },
-                    { value: 12, color: 'rgba(170, 128, 177, 0.84)' },
-                    { value: 25, color: 'rgba(164, 123, 170, 1)' },
-                    { value: 50, color: 'rgba(116,76,172, 0.9)' },
-                    { value: 100, color: 'rgba(158, 128, 177, 1)' },
-                    { value: 200, color: 'rgba(48, 6, 53, 0.82)' }
-                ]
-            }
+            zoomOffset: -1
         }
     }, {
         id: 'OWM_VANE_TEMP',
@@ -126,36 +94,7 @@
         leaflet: {
             day: new Date().toISOString().substring(0,19),
             tileSize: 512,
-            zoomOffset: -1,
-            controls: {
-                weatherTimeSliderInHrs: {
-                    enabled: true
-                }
-            },
-            legend: {
-                name: 'Temp',
-                units: "°C",
-                position: 'bottomright',
-                gradient: [
-                    { value: -40, color: 'rgba(159, 85, 181, 0)' },
-                    { value: -33, color: 'rgba(44, 106, 187, 8.75)' },
-                    { value: -30, color: 'rgba(82, 139, 213, 12.5)' },
-                    { value: -25, color: 'rgba(103, 163, 222, 18.75)' },
-                    { value: -20, color: 'rgba(142, 202, 240, 25)' },
-                    { value: -15, color: 'rgba(155, 213, 244, 31.25)' },
-                    { value: -10, color: 'rgba(172, 225, 253, 37.5)' },
-                    { value: -5, color: 'rgba(194, 234, 255, 43.75)' },
-                    { value: 0, color: 'rgba(255, 255, 208, 50)' },
-                    { value: 5, color: 'rgba(254, 248, 174, 56.25)' },
-                    { value: 10, color: 'rgba(254, 232, 146, 62.5)' },
-                    { value: 15, color: 'rgba(254, 226, 112, 68.75)' },
-                    { value: 20, color: 'rgba(253, 212, 97, 75)' },
-                    { value: 26, color: 'rgba(244, 168, 94, 82.5)' },
-                    { value: 30, color: 'rgba(244, 129, 89, 87.5)' },
-                    { value: 35, color: 'rgba(244, 104, 89, 93.75)' },
-                    { value: 40, color: 'rgba(244, 76, 73, 100)' }
-                ]
-            }
+            zoomOffset: -1
         }
     }];
     const baseLayersConfig = [{
@@ -201,25 +140,18 @@
     baseLayersConfig.forEach((overlay) => createLayer(overlay, maps.bases));
 
     const map = L.map('map', {
+        attributionControl: false,
         layers: [ maps.bases['Satellite'] ] 
     });
 
     map.setView([39.132104, -98.681782], 4.5);
     const layers = L.control.layers(maps.bases, maps.overlays).addTo(map);
 
-    controlsConfig.forEach((control) => {
-        if (control.type === 'slider') {
-            L.control.slider(control, map);
-        } else {
-            console.error(`Control type ${control.type} not supported.`);
-        }
-    });
-
     Object.values(maps.overlays).forEach((tileLayer) => {
-        if (tileLayer.options.legend) {
-            const legend = L.control.legend(tileLayer, tileLayer.options.legend);
-            tileLayer.on('add', () => legend.addTo(map));
-            tileLayer.on('remove', () => legend.remove());
+        if (tileLayer.options.controlGroup && tileLayer.options.controlGroup.items) {
+            const controlGrp = L.control.controlGroup(tileLayer);
+            tileLayer.on('add', () => controlGrp.addTo(map));
+            tileLayer.on('remove', () => controlGrp.remove());
         }
     });
 })()
