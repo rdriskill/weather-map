@@ -4,10 +4,32 @@ L.Control.ControlGroup = L.Control.extend({
         this.tileLayer = tileLayer;
     },
     onAdd: function (map) {
+        const css = {
+            btn: {
+                close: 'close',
+                minimize: 'minimize',
+                maximize: 'maximize'
+            }
+        }
+
         this.container = L.DomUtil.create('div', 'control-group');
         this.items = [];
+        this.container.innerHTML += `
+            <header>
+                <h3 style="width:88%">${this.tileLayer.options.controlGroup.name}</h3>
+                <button class="${css.btn.minimize}" style="margin-right:10px;" aria-label="Minimize or Maximize ${this.tileLayer.options.controlGroup.name} Panel" />
+                <button class="${css.btn.close}" aria-label="Close ${this.tileLayer.options.controlGroup.name} Panel" />
+            </header>`;
+        const btns = this.container.querySelectorAll(`header button.${css.btn.minimize}, header button.${css.btn.maximize}`);
 
-        this.container.innerHTML += `<h3 class="heading">${this.tileLayer.options.controlGroup.name}</h3>`;
+        btns.forEach(btn => btn.onclick = () => {
+            const items = this.container.querySelectorAll('div.legend, div.slider');
+            items.forEach(item => item.classList.toggle('hidden'));
+
+            btn.classList.toggle(css.btn.minimize);
+            btn.classList.toggle(css.btn.maximize);
+        });
+        this.container.querySelector(`header button.${css.btn.close}`).onclick = () => this.remove();
         
         if (this.tileLayer.options.controlGroup && this.tileLayer.options.controlGroup.items) {
             this.tileLayer.options.controlGroup.items.forEach((itemConfig) => {
